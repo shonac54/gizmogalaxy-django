@@ -1,0 +1,49 @@
+{% extends 'admin_base.html' %}
+{% block main %}
+
+<div class="card shadow mt-5">
+    <div class="card-body">
+        <h5 class="p-2" style="border-bottom: 2px solid orange;">Manage Products</h5>
+        <div class="container-fluid mt-5">
+            <table class="table table-bordered table-sm" id="example">
+                <thead>
+                    <tr>
+                        <th>S No.</th>
+                        <th>Product Name</th>
+                        <th>Slug</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Images</th>
+                        <th>Stock</th>
+                        <th>Is Available</th>
+                        <th>Category</th>
+                        <th>Reg. Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ product.product_name }}</td>
+                            <td>{{ product.slug }}</td>
+                            <td>{{ product.description }}</td>
+                            <td>{{ product.price }}</td>
+                            <td><img src="{{ product.images.url }}" alt="{{ product.product_name }}" width="50"></td>
+                            <td>{{ product.stock }}</td>
+                            <td>{% if product.is_available %}Yes{% else %}No{% endif %}</td>
+                            <td>{{ product.category.category_name }}</td>
+                            <td>{{ product.created_date }}</td>
+                            <td>
+                                <a href="{% url 'edit_product' product.id %}" class="text-primary">Edit</a> |
+                                <a href="{% url 'delete_product' product.id %}" class="text-danger" onclick="return confirm('Are You Sure?')">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

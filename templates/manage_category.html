@@ -1,0 +1,46 @@
+{% extends 'admin_base.html' %}
+{% block main %}
+
+<div class="card shadow mt-5">
+    <div class="card-body">
+        <h5 class="p-2" style="border-bottom: 2px solid orange;">Manage Category</h5>
+        <div class="container-fluid mt-5">
+            <table class="table table-bordered table-sm" id="example">
+                <thead>
+                    <tr>
+                        <th>S No.</th>
+                        <th>Category Name</th>
+                        <th>Slug</th>
+                        <th>Description</th>
+                        <th>Category Image</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ category.category_name }}</td>
+                            <td>{{ category.slug }}</td>
+                            <td>{{ category.description }}</td>
+                            <td>
+                                {% if category.cat_image %}
+                                    <img src="{{ category.cat_image.url }}" alt="{{ category.category_name }}" style="max-width: 50px; max-height: 50px;">
+                                {% else %}
+                                    No Image
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_category' category.id %}" class="text-primary">Edit</a> |
+                                <a href="{% url 'delete_category' category.id %}" class="text-danger" onclick="return confirm('Are You Sure?')">Delete</a>
+                            </td>
+                            
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

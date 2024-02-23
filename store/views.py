@@ -74,3 +74,72 @@ def search(request):
         'product_count':product_count,
     }
     return render(request,'store/store.html',context)
+
+
+
+
+from django.shortcuts import render, redirect
+from .models import Product
+from .forms import ProductForm
+
+from django.shortcuts import render, redirect
+from .models import Product
+from .forms import ProductForm
+from category.models import Category  # Import Category model
+
+def add_product(request):
+    # Your authentication check goes here
+
+    error = ""
+    
+    # Retrieve categories from the database
+    categories = Category.objects.all()
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            error = "no"
+            # Redirect to the manage_product page upon successful form submission
+            return redirect('manage_product')
+        else:
+            error = "yes"
+    else:
+        form = ProductForm()
+
+    return render(request, 'add_product.html', {'form': form, 'error': error, 'categories': categories})
+
+
+def manage_product(request):
+    # Your authentication check goes here
+    
+    products = Product.objects.all()
+    
+    return render(request, 'manage_product.html', {'products': products})
+
+def edit_product(request, pid):
+    # Your authentication check goes here
+    
+    error = ""
+    product = Product.objects.get(id=pid)
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            error = "no"
+        else:
+            error = "yes"
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'edit_product.html', {'form': form, 'error': error, 'product': product})
+
+def delete_product(request, pid):
+    # Your authentication check goes here
+    
+    product = Product.objects.get(id=pid)
+    product.delete()
+    
+    return redirect('manage_product')
+

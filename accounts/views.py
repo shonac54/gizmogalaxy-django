@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 
+
 #Verification email
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -13,6 +14,10 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+
+from carts.views import _cart_id
+from carts.models import Cart,CartItem
+
 
 
 
@@ -60,26 +65,36 @@ def register(request):
     }
     return render(request, 'accounts/register.html', context)
 
-
-#login
-def login(request):
+def user_login(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
         
         user = auth.authenticate(email=email, password=password)
 
-
         if user is not None:
-            auth.login(request,user)
-            #messages.success(request,"You are now logged in")
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+
+                    for item in cart_item:
+                        item.user = user
+                        item.save()
+
+            except:
+                pass
+
+            auth.login(request, user)
+            # messages.success(request,"You are now logged in")
             return redirect('home')
-        
         else:
-            messages.error(request,"Invalid login credentials")
+            messages.error(request, "Invalid login credentials")
             return redirect('login')
 
-    return render(request,'accounts/login.html')
+    return render(request, 'accounts/login.html')
+
 
 
 
@@ -191,6 +206,48 @@ def resetPassword(request):
 
     
 
+def admin_home(request):
+    return render(request, 'admin_home.html')
+from django.contrib.auth import authenticate
+   
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
 
-    
+def admin_login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('uname')  # Adjusted to match the form field name
+        password = request.POST.get('pwd')   # Adjusted to match the form field name
 
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # Assuming you have a user object, you can use login()
+            login(request, user)
+            return redirect('admin_home')  # Redirect to the admin home page after successful login
+        else:
+            # Handle invalid login credentials
+            return render(request, 'accounts/admin_login.html', {'error': 'yes'})
+
+    return render(request, 'accounts/admin_login.html')
+
+
+
+def admin_dashboard_view(request):
+    if not request.user.is_authenticated:
+        messages.warning(request, 'You are not logged in.')
+        return redirect('admin_login')
+
+    return render(request, 'accounts/admin_dashboard.html')
+
+def admin_logout_view(request):
+    logout(request)
+    messages.success(request, 'Logout successful.')
+    return redirect('admin_login')
+
+from django.shortcuts import render
+from .models import Account
+
+def registered_users_view(request):
+    users = Account.objects.all()
+    context = {'users': users}
+    return render(request, 'user_table.html', context)

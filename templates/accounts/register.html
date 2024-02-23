@@ -1,76 +1,102 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-
-
 <!-- ========================= SECTION CONTENT ========================= -->
 <section class="section-content padding-y">
 
     <!-- ============================ COMPONENT REGISTER   ================================= -->
     <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
         <article class="card-body">
-
             {% include 'includes/alerts.html' %}
-
             <header class="mb-4">
                 <h4 class="card-title">Sign up</h4>
             </header>
-            <form action="{% url 'register' %}" method="POST">
+            <form id="registerForm" action="{% url 'register' %}" method="POST">
                 {% csrf_token %}
-
-
                 <div class="form-row">
                     <div class="col form-group">
-                        <label>First name</label>
-                        {{ form.first_name }}
-                    </div> <!-- form-group end.// -->
+                        <label for="first_name">First name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    </div>
                     <div class="col form-group">
-                        <label>Last name</label>
-                        {{ form.last_name }}
-                    </div> <!-- form-group end.// -->
-                </div> <!-- form-row end.// -->
-
-
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Email</label>
-                        {{ form.email }}
-
-                    </div> <!-- form-group end.// -->
-                    <div class="form-group col-md-6">
-                        <label>Phone Number</label>
-                        {{ form.phone_number }}
-                    </div> <!-- form-group end.// -->
-                </div> <!-- form-row.// -->
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Create password</label>
-                        {{ form.password }}
-                    </div> <!-- form-group end.// -->
-                    <div class="form-group col-md-6">
-                        <label>Confirm password</label>
-                        {{ form.confirm_password }}
-                    </div> <!-- form-group end.// -->
+                        <label for="last_name">Last name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    </div>
                 </div>
-
-               
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone_number" name="phone_number" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="password">Create password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <small id="passwordHelp" class="form-text text-muted">Password must be at least 8 characters long, and include at least one lowercase letter, one uppercase letter, and one special character.</small>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="confirm_password">Confirm password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
                 <div class="form-group">
-                    
-                    <button type="submit" class="btn btn-primary btn-block"> Register </button>
-                </div> <!-- form-group// -->
-                {{ form.email.errors }}
-                
-                {{ form.non_field_errors }}
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </div>
             </form>
-        </article><!-- card-body.// -->
-    </div> <!-- card .// -->
+        </article>
+    </div>
     <p class="text-center mt-4">Have an account? <a href="{% url 'login' %}">Log In</a></p>
     <br><br>
     <!-- ============================ COMPONENT REGISTER  END.// ================================= -->
-
-
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var registerForm = document.getElementById("registerForm");
+        var passwordInput = document.getElementById("password");
+        var confirmPasswordInput = document.getElementById("confirm_password");
+        var passwordHelp = document.getElementById("passwordHelp");
+
+        registerForm.addEventListener("submit", function(event) {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                event.preventDefault();
+                alert("Passwords do not match.");
+            }
+        });
+
+        passwordInput.addEventListener("input", function() {
+            var password = passwordInput.value;
+
+            var hasLowerCase = /[a-z]/.test(password);
+            var hasUpperCase = /[A-Z]/.test(password);
+            var hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+            var isLengthValid = password.length >= 8;
+
+            if (hasLowerCase && hasUpperCase && hasSpecialChar && isLengthValid) {
+                passwordInput.setCustomValidity("");
+                passwordHelp.classList.remove("text-danger");
+                passwordHelp.innerText = "Password is valid.";
+            } else {
+                passwordInput.setCustomValidity("Password must be at least 8 characters long, and include at least one lowercase letter, one uppercase letter, and one special character.");
+                passwordHelp.classList.add("text-danger");
+                passwordHelp.innerText = "Password must be at least 8 characters long, and include at least one lowercase letter, one uppercase letter, and one special character.";
+            }
+        });
+
+        confirmPasswordInput.addEventListener("input", function() {
+            if (passwordInput.value === confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity("");
+            } else {
+                confirmPasswordInput.setCustomValidity("Passwords do not match.");
+            }
+        });
+    });
+</script>
 
 {% endblock %}
